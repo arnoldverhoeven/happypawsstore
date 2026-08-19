@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller Dashboard — Happy Paws Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <svg class="logo-mark" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="19" fill="#E8A93B"/>
+        <ellipse cx="20" cy="25" rx="9" ry="7" fill="#123A37"/>
+        <ellipse cx="12" cy="15" rx="3.6" ry="4.6" fill="#123A37"/>
+        <ellipse cx="28" cy="15" rx="3.6" ry="4.6" fill="#123A37"/>
+        <ellipse cx="7" cy="21" rx="2.8" ry="3.6" fill="#123A37"/>
+        <ellipse cx="33" cy="21" rx="2.8" ry="3.6" fill="#123A37"/>
+      </svg>
+      <span class="logo-text">Happy Paws</span>
+    </a>
+    <nav><span class="mono" style="color:var(--sand); opacity:0.7;">Seller Portal</span></nav>
+    <div class="header-actions">
+      <span style="color:var(--sand); font-size:0.85rem;">Hi, Sarah 🐾</span>
+      <a href="login.html" class="btn-login">Log out</a>
+    </div>
+  </div>
+</header>
+
+<div class="dash-shell">
+  <aside class="dash-side">
+    <a class="active">📊 Overview</a>
+    <a>📦 My Products</a>
+    <a>🧾 Orders</a>
+    <a>💳 Payouts</a>
+    <a>⚙️ Store Settings</a>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-head">
+      <div>
+        <h1 style="font-size:1.6rem;">My Products</h1>
+        <div class="count-label">14 products · 12 live, 2 drafts</div>
+      </div>
+      <a href="#" class="btn btn-primary">+ Add new product</a>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card"><span class="mono">This month's sales</span><div class="val">€1,284</div></div>
+      <div class="stat-card"><span class="mono">Orders</span><div class="val">47</div></div>
+      <div class="stat-card"><span class="mono">Live products</span><div class="val">12</div></div>
+      <div class="stat-card"><span class="mono">Low stock</span><div class="val" style="color:var(--coral);">2</div></div>
+    </div>
+
+    <table class="dash-table">
+      <thead>
+        <tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="prod-row-thumb">🦴</span>Slow-Feed Puzzle Bowl</td>
+          <td>€18.90</td><td>34</td>
+          <td><span class="status-pill live">Live</span></td>
+          <td class="row-actions"><span>Edit</span><span>Unpublish</span></td>
+        </tr>
+        <tr>
+          <td><span class="prod-row-thumb">🐟</span>Grain-Free Salmon Kibble</td>
+          <td>€34.50</td><td>6</td>
+          <td><span class="status-pill live">Live</span></td>
+          <td class="row-actions"><span>Edit</span><span>Unpublish</span></td>
+        </tr>
+        <tr>
+          <td><span class="prod-row-thumb">🧸</span>Rope &amp; Squeak Toy Set</td>
+          <td>€9.90</td><td>58</td>
+          <td><span class="status-pill live">Live</span></td>
+          <td class="row-actions"><span>Edit</span><span>Unpublish</span></td>
+        </tr>
+        <tr>
+          <td><span class="prod-row-thumb">🛏️</span>Cosy Corner Pet Bed</td>
+          <td>€44.00</td><td>0</td>
+          <td><span class="status-pill draft">Draft</span></td>
+          <td class="row-actions"><span>Edit</span><span>Publish</span></td>
+        </tr>
+        <tr>
+          <td><span class="prod-row-thumb">🪥</span>Dental Chew Sticks (12pk)</td>
+          <td>€11.20</td><td>2</td>
+          <td><span class="status-pill live">Live</span></td>
+          <td class="row-actions"><span>Edit</span><span>Unpublish</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+</div>
+
+</body>
+</html>
