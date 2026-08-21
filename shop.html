@@ -7,13 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<script src="shopzo-client.js" defer></script>
+<script src="shopzo-client.js"></script>
 </head>
 <body>
 
 <header>
   <div class="header-inner">
-    <div class="logo">
+    <a href="index.html" class="logo">
       <svg class="logo-mark" viewBox="0 0 40 40" fill="none">
         <circle cx="20" cy="20" r="19" fill="#1E9D49"/>
         <ellipse cx="20" cy="25" rx="9" ry="7" fill="#FFFDF8"/>
@@ -23,7 +23,7 @@
         <ellipse cx="33" cy="21" rx="2.8" ry="3.6" fill="#FFFDF8"/>
       </svg>
       <span class="logo-text">Happy Paws Store</span>
-    </div>
+    </a>
     <nav>
       <a href="shop.html" class="active">Dogs</a>
       <a href="shop.html">Cats</a>
@@ -41,12 +41,12 @@
 </header>
 
 <div class="wrap">
-  <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><a href="shop.html">Shop</a><span class="sep">/</span><span class="current">Dogs</span></div>
+  <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><span class="current">Shop</span></div>
 
   <div class="page-head">
     <div>
-      <h1>Dog Food &amp; Supplies</h1>
-      <div class="count-label">312 products for happy, healthy dogs</div>
+      <h1>All products</h1>
+      <div class="count-label" id="page-count-label">Loading…</div>
     </div>
   </div>
 
@@ -54,40 +54,29 @@
     <aside class="filters">
       <div class="filter-group">
         <h4>Category</h4>
-        <label class="filter-option"><input type="checkbox" checked> Food &amp; Treats</label>
-        <label class="filter-option"><input type="checkbox"> Toys</label>
-        <label class="filter-option"><input type="checkbox"> Health &amp; Care</label>
-        <label class="filter-option"><input type="checkbox"> Beds &amp; Crates</label>
-        <label class="filter-option"><input type="checkbox"> Leashes &amp; Collars</label>
-      </div>
-      <div class="filter-group">
-        <h4>Brand</h4>
-        <label class="filter-option"><input type="checkbox"> Royal Canin</label>
-        <label class="filter-option"><input type="checkbox"> Kong</label>
-        <label class="filter-option"><input type="checkbox"> Orijen</label>
-        <label class="filter-option"><input type="checkbox"> Trixie</label>
+        <div id="category-filters">
+          <p class="mono" style="opacity:0.5;">Loading…</p>
+        </div>
       </div>
       <div class="filter-group">
         <h4>Price</h4>
-        <div class="price-range"><input type="text" value="€0"> to <input type="text" value="€80"></div>
+        <div class="price-range">
+          <input type="number" id="price-min" placeholder="€0" min="0">
+          to
+          <input type="number" id="price-max" placeholder="€999" min="0">
+        </div>
       </div>
-      <div class="filter-group">
-        <h4>Dog Size</h4>
-        <label class="filter-option"><input type="checkbox"> Small</label>
-        <label class="filter-option"><input type="checkbox"> Medium</label>
-        <label class="filter-option"><input type="checkbox"> Large</label>
-      </div>
-      <button class="btn btn-outline btn-block btn-sm">Clear filters</button>
+      <button class="btn btn-outline btn-block btn-sm" id="clear-filters">Clear filters</button>
     </aside>
 
     <div>
       <div class="toolbar">
-        <span class="count-label" style="font-size:0.85rem; color:var(--muted);">Showing 1–12 of 312</span>
-        <select class="sort-select">
-          <option>Sort: Most popular</option>
-          <option>Price: low to high</option>
-          <option>Price: high to low</option>
-          <option>Newest first</option>
+        <span class="count-label" id="toolbar-count-label" style="font-size:0.85rem; color:var(--muted);">Loading…</span>
+        <select class="sort-select" id="sort-select">
+          <option value="popular">Sort: Most popular</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+          <option value="newest">Newest first</option>
         </select>
       </div>
 
@@ -103,15 +92,96 @@
 </div>
 
 <script>
+  let allProducts = [];
+
+  function effectivePrice(p) {
+    return (p.sale_price_cents ?? p.price_cents) / 100;
+  }
+
+  function renderCategoryFilters(products) {
+    const categories = [...new Set(products.map((p) => p.category).filter(Boolean))].sort();
+    const container = document.getElementById('category-filters');
+
+    if (categories.length === 0) {
+      container.innerHTML = '<p class="mono" style="opacity:0.5;">No categories yet</p>';
+      return;
+    }
+
+    container.innerHTML = categories
+      .map(
+        (cat) => `
+        <label class="filter-option">
+          <input type="checkbox" class="category-checkbox" value="${escapeHtml(cat)}">
+          ${escapeHtml(cat)}
+        </label>
+      `
+      )
+      .join('');
+
+    container.querySelectorAll('.category-checkbox').forEach((cb) => {
+      cb.addEventListener('change', applyFilters);
+    });
+  }
+
+  function applyFilters() {
+    const checkedCategories = [...document.querySelectorAll('.category-checkbox:checked')].map((cb) => cb.value);
+    const min = parseFloat(document.getElementById('price-min').value) || 0;
+    const maxInput = document.getElementById('price-max').value;
+    const max = maxInput ? parseFloat(maxInput) : Infinity;
+    const sort = document.getElementById('sort-select').value;
+
+    let filtered = allProducts.filter((p) => {
+      const categoryOk = checkedCategories.length === 0 || checkedCategories.includes(p.category);
+      const price = effectivePrice(p);
+      const priceOk = price >= min && price <= max;
+      return categoryOk && priceOk;
+    });
+
+    if (sort === 'price-asc') filtered.sort((a, b) => effectivePrice(a) - effectivePrice(b));
+    if (sort === 'price-desc') filtered.sort((a, b) => effectivePrice(b) - effectivePrice(a));
+    // "newest" and "popular" both fall back to the API's default order
+    // (newest first) since there's no popularity data yet.
+
+    renderGrid(filtered);
+  }
+
+  function renderGrid(products) {
+    const grid = document.getElementById('shopzo-products');
+    const total = allProducts.length;
+
+    document.getElementById('page-count-label').textContent =
+      `${total} product${total === 1 ? '' : 's'}`;
+    document.getElementById('toolbar-count-label').textContent =
+      `Showing ${products.length} of ${total}`;
+
+    grid.innerHTML = products.length
+      ? products.map((p) => renderProductCard(p)).join('')
+      : '<p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center;">No products match these filters.</p>';
+  }
+
+  document.getElementById('price-min').addEventListener('input', applyFilters);
+  document.getElementById('price-max').addEventListener('input', applyFilters);
+  document.getElementById('sort-select').addEventListener('change', applyFilters);
+  document.getElementById('clear-filters').addEventListener('click', () => {
+    document.querySelectorAll('.category-checkbox').forEach((cb) => (cb.checked = false));
+    document.getElementById('price-min').value = '';
+    document.getElementById('price-max').value = '';
+    document.getElementById('sort-select').value = 'popular';
+    applyFilters();
+  });
+
   (async function () {
     const grid = document.getElementById('shopzo-products');
     try {
-      const products = await shopzoFetchProducts();
-      if (products.length === 0) {
+      allProducts = await shopzoFetchProducts();
+      renderCategoryFilters(allProducts);
+      if (allProducts.length === 0) {
+        document.getElementById('page-count-label').textContent = '0 products';
+        document.getElementById('toolbar-count-label').textContent = 'Showing 0 of 0';
         grid.innerHTML = '<p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center;">No products yet — check back soon.</p>';
         return;
       }
-      grid.innerHTML = products.map((p) => renderProductCard(p)).join('');
+      renderGrid(allProducts);
     } catch (err) {
       grid.innerHTML = '<p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center; color:var(--coral);">Could not load products right now.</p>';
     }
