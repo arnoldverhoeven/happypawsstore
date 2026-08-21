@@ -114,9 +114,9 @@ nav a:hover, nav a.active{color:var(--mustard);}
 .hero h1 span{color:var(--mustard);}
 .hero p{color:var(--sand-deep); font-size:1.08rem; max-width:440px; margin-bottom:30px; line-height:1.55;}
 .hero-ctas{display:flex; gap:14px; flex-wrap:wrap;}
-.hero-art{position:relative; height:340px; display:flex; align-items:center; justify-content:center;}
-.hero-blob{position:absolute; width:280px; height:280px; border-radius:38% 62% 55% 45% / 45% 40% 60% 55%; background:var(--teal-700);}
-.hero-paw{position:relative; width:150px; height:150px; z-index:1;}
+.hero-art{position:relative; height:280px; display:flex; align-items:center; justify-content:center;}
+.hero-blob{position:absolute; width:200px; height:200px; border-radius:38% 62% 55% 45% / 45% 40% 60% 55%; background:var(--teal-700);}
+.hero-paw{position:relative; width:96px; height:96px; z-index:1; filter:drop-shadow(0 8px 16px rgba(0,0,0,0.12));}
 
 /* SHOP-BY-PET TAG STRIP */
 .pet-strip{background:var(--sand); padding:0; position:relative; margin-top:-1px;}

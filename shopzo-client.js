@@ -6,6 +6,16 @@ const SHOPZO_API_BASE = 'https://api.shopzo.be';
 const SHOPZO_SELLER = 'happy-paws';
 const CART_STORAGE_KEY = 'shopzo_cart_happy-paws';
 
+// Moet gelijk blijven aan SHIPPING_THRESHOLD_CENTS / SHIPPING_FEE_CENTS in
+// checkout.js — dit bepaalt enkel wat hier getoond wordt, het bedrag dat
+// echt aangerekend wordt, wordt altijd opnieuw server-side berekend.
+const SHIPPING_THRESHOLD_CENTS = 4000; // €40
+const SHIPPING_FEE_CENTS = 495; // €4,95
+
+function calculateShipping(subtotalCents) {
+  return subtotalCents >= SHIPPING_THRESHOLD_CENTS ? 0 : SHIPPING_FEE_CENTS;
+}
+
 /* ---------- Winkelmandje (opgeslagen in de browser, per toestel) ---------- */
 
 function getCart() {
