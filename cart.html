@@ -46,7 +46,7 @@
     <div class="summary-card">
       <h3>Bestelsamenvatting</h3>
       <div class="summary-row"><span>Subtotaal</span><span id="cart-subtotal">€0,00</span></div>
-      <div class="summary-row"><span>Levering</span><span style="color:#2A7A3B; font-weight:600;">Gratis</span></div>
+      <div class="summary-row"><span>Levering</span><span id="cart-shipping" style="color:#2A7A3B; font-weight:600;">—</span></div>
       <div class="summary-row total"><span>Totaal</span><span id="cart-total">€0,00</span></div>
 
       <div class="field" style="margin-top:20px;">
@@ -129,6 +129,18 @@
     const subtotal = cartProducts.reduce((sum, p) => sum + (p.sale_price_cents ?? p.price_cents) * p.quantity, 0);
     document.getElementById('cart-subtotal').textContent = formatEuro(subtotal);
     document.getElementById('cart-total').textContent = formatEuro(subtotal);
+
+    // Shopzo heeft momenteel geen echt verzendkosten-systeem — er wordt
+    // sowieso nooit een verzendkost aangerekend bij Mollie. Deze tekst is
+    // dus puur informatief en belooft niets dat niet klopt.
+    const shippingEl = document.getElementById('cart-shipping');
+    if (subtotal >= 4000) {
+      shippingEl.textContent = 'Gratis';
+      shippingEl.style.color = '#2A7A3B';
+    } else {
+      shippingEl.textContent = 'Gratis vanaf €40';
+      shippingEl.style.color = 'var(--muted)';
+    }
   }
 
   document.getElementById('checkout-btn').addEventListener('click', async () => {
