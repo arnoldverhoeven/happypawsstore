@@ -97,7 +97,11 @@ async function shopzoCheckout({ name, email }) {
       seller: SHOPZO_SELLER,
       customer: { name, email },
       items: cart.map((line) => ({ product_id: line.product_id, quantity: line.quantity })),
-      redirect_url: `${window.location.origin}/thankyou.html`
+      redirect_url: `${window.location.origin}/thankyou.html`,
+      // TIJDELIJK: forceert een Mollie-testbetaling (geen echt geld) zodat
+      // de volledige flow getest kan worden terwijl het Mollie-account nog
+      // niet live-goedgekeurd is. Verwijder deze regel zodra dat wel zo is.
+      testmode: true
     })
   });
 
