@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="shopzo-client.js" defer></script>
 </head>
 <body>
 
@@ -30,47 +31,40 @@
       <span class="icon-btn">♡</span>
       <span class="icon-btn">⌕</span>
       <a href="cart.html" class="icon-btn">🛒<span class="cart-count">3</span></a>
-      <a href="login.html" class="btn-login">Log in</a>
+      <a href="https://app.shopzo.be" class="btn-login" target="_blank">Log in</a>
     </div>
   </div>
 </header>
 
 <div class="wrap">
-  <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><a href="shop.html">Dogs</a><span class="sep">/</span><span class="current">Slow-Feed Puzzle Bowl</span></div>
+  <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><a href="shop.html">Shop</a><span class="sep">/</span><span class="current" id="pd-breadcrumb">Loading…</span></div>
 
-  <div class="pd-layout" style="margin-top:26px;">
+  <div id="pd-loading" style="padding:80px 0; text-align:center;">
+    <p class="mono">Loading product…</p>
+  </div>
+
+  <div class="pd-layout" style="margin-top:26px; display:none;" id="pd-content">
     <div>
-      <div class="pd-gallery-main">🦴</div>
-      <div class="pd-thumbs">
-        <div class="pd-thumb active">🦴</div>
-        <div class="pd-thumb">🐕</div>
-        <div class="pd-thumb">📦</div>
-      </div>
+      <div class="pd-gallery-main" id="pd-image">🛍️</div>
     </div>
 
     <div class="pd-info">
-      <span class="mono">Food &amp; Treats</span>
-      <h1>Slow-Feed Puzzle Bowl</h1>
-      <div class="pd-rating"><span class="stars">★★★★★</span><span style="color:var(--muted); font-weight:500;">4.8 (216 reviews)</span></div>
-      <div class="pd-price-row"><span class="pd-price">€18.90</span></div>
-      <p class="pd-desc">Turns mealtime into a game. The raised maze pattern slows fast eaters by up to 10x, reducing bloating and adding a bit of mental stimulation to every meal. Dishwasher-safe, non-slip base, made from food-grade silicone.</p>
-
-      <div class="pd-options">
-        <h4>Size</h4>
-        <div class="size-pills">
-          <div class="size-pill">Small</div>
-          <div class="size-pill active">Medium</div>
-          <div class="size-pill">Large</div>
-        </div>
-      </div>
+      <span class="mono" id="pd-category">Product</span>
+      <h1 id="pd-name">Loading…</h1>
+      <div class="pd-price-row" id="pd-price-row"><span class="pd-price">—</span></div>
+      <p class="pd-desc" id="pd-desc"></p>
 
       <div class="qty-cart-row">
-        <div class="qty-stepper"><button>–</button><span>1</span><button>+</button></div>
-        <a href="cart.html" class="btn btn-primary" style="flex:1; justify-content:center;">Add to cart — €18.90</a>
+        <div class="qty-stepper">
+          <button type="button" id="pd-qty-minus">–</button>
+          <span id="pd-qty">1</span>
+          <button type="button" id="pd-qty-plus">+</button>
+        </div>
+        <button type="button" id="pd-add-to-cart" class="btn btn-primary" style="flex:1; justify-content:center;">Add to cart</button>
       </div>
 
       <div class="pd-meta">
-        <div><strong>In stock</strong> — ships within 1 business day</div>
+        <div id="pd-stock"><strong>In stock</strong></div>
         <div><strong>Free delivery</strong> on orders over €40</div>
         <div><strong>Sold &amp; shipped by</strong> Happy Paws Store</div>
       </div>
@@ -81,22 +75,94 @@
     <div class="section-head">
       <div><span class="mono">You might also like</span><h2>Complete the routine</h2></div>
     </div>
-    <div class="products">
-      <div class="product-card"><div class="string"></div>
-        <div class="product-tag"><div class="tag-hole-top"></div><div class="product-thumb">🐟</div><h4>Grain-Free Salmon Kibble</h4><div class="price-row"><span class="price">€34.50</span></div><div class="approved">Bestseller · 2kg</div></div>
-      </div>
-      <div class="product-card"><div class="string"></div>
-        <div class="product-tag"><div class="tag-hole-top"></div><div class="product-thumb">🪥</div><h4>Dental Chew Sticks (12pk)</h4><div class="price-row"><span class="price">€11.20</span></div><div class="approved">Reduces tartar</div></div>
-      </div>
-      <div class="product-card"><div class="string"></div>
-        <div class="product-tag"><div class="tag-hole-top"></div><div class="product-thumb">🍖</div><h4>Freeze-Dried Liver Treats</h4><div class="price-row"><span class="price">€7.50</span></div><div class="approved">Single ingredient</div></div>
-      </div>
-      <div class="product-card"><div class="string"></div>
-        <div class="product-tag"><div class="tag-hole-top"></div><div class="product-thumb">🛏️</div><h4>Cosy Corner Pet Bed</h4><div class="price-row"><span class="price">€44.00</span></div><div class="approved">Machine washable</div></div>
-      </div>
+    <div class="products" id="pd-related">
+      <p class="mono" style="grid-column:1/-1;">Loading…</p>
     </div>
   </section>
 </div>
+
+<script>
+  (async function () {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    const loadingEl = document.getElementById('pd-loading');
+    const contentEl = document.getElementById('pd-content');
+
+    if (!productId) {
+      loadingEl.innerHTML = '<p class="mono">No product specified. <a href="shop.html">Back to shop →</a></p>';
+      return;
+    }
+
+    let product;
+    try {
+      product = await shopzoFetchProduct(productId);
+    } catch (err) {
+      loadingEl.innerHTML = '<p class="mono">Product not found. <a href="shop.html">Back to shop →</a></p>';
+      return;
+    }
+
+    document.title = `${product.name} — Happy Paws Store`;
+    document.getElementById('pd-breadcrumb').textContent = product.name;
+    document.getElementById('pd-category').textContent = product.category || 'Product';
+    document.getElementById('pd-name').textContent = product.name;
+    document.getElementById('pd-desc').textContent = product.description || '';
+
+    if (product.image_url) {
+      document.getElementById('pd-image').innerHTML =
+        `<img src="${product.image_url}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover;border-radius:20px;">`;
+    }
+
+    const priceRow = document.getElementById('pd-price-row');
+    if (product.sale_price_cents) {
+      priceRow.innerHTML = `<span class="pd-price">${formatEuro(product.sale_price_cents)}</span><span class="price-old" style="font-size:1.1rem;">${formatEuro(product.price_cents)}</span>`;
+    } else {
+      priceRow.innerHTML = `<span class="pd-price">${formatEuro(product.price_cents)}</span>`;
+    }
+
+    const stockEl = document.getElementById('pd-stock');
+    stockEl.innerHTML = product.stock > 0
+      ? '<strong>In stock</strong> — ships within 1 business day'
+      : '<strong style="color:var(--coral);">Out of stock</strong>';
+
+    let qty = 1;
+    const qtyEl = document.getElementById('pd-qty');
+    document.getElementById('pd-qty-minus').addEventListener('click', () => {
+      qty = Math.max(1, qty - 1);
+      qtyEl.textContent = qty;
+    });
+    document.getElementById('pd-qty-plus').addEventListener('click', () => {
+      qty = Math.min(product.stock, qty + 1);
+      qtyEl.textContent = qty;
+    });
+
+    const addBtn = document.getElementById('pd-add-to-cart');
+    if (product.stock <= 0) {
+      addBtn.disabled = true;
+      addBtn.textContent = 'Out of stock';
+      addBtn.style.opacity = '0.5';
+    } else {
+      addBtn.addEventListener('click', () => {
+        addToCart(product.id, qty);
+        window.location.href = 'cart.html';
+      });
+    }
+
+    loadingEl.style.display = 'none';
+    contentEl.style.display = 'grid';
+
+    // Related products: a few other active products from the same store.
+    try {
+      const all = await shopzoFetchProducts();
+      const related = all.filter((p) => p.id !== product.id).slice(0, 4);
+      const relatedEl = document.getElementById('pd-related');
+      relatedEl.innerHTML = related.length
+        ? related.map((p) => renderProductCard(p)).join('')
+        : '<p class="mono">No other products yet.</p>';
+    } catch {
+      document.getElementById('pd-related').innerHTML = '';
+    }
+  })();
+</script>
 
 <footer>
   <div class="wrap">
@@ -104,7 +170,7 @@
       <div><div class="footer-logo">Happy Paws Store</div><div style="font-size:0.85rem; opacity:0.8; max-width:240px; line-height:1.6;">Your neighbourhood pet store, now online too. Antwerp-based, pet-obsessed.</div></div>
       <div><h4>Shop</h4><a href="shop.html">Dogs</a><a href="shop.html">Cats</a><a href="shop.html">Small Pets</a><a href="shop.html">Aquatics</a></div>
       <div><h4>Help</h4><a href="#">Delivery info</a><a href="#">Returns</a><a href="#">Contact us</a><a href="#">FAQ</a></div>
-      <div><h4>Store</h4><a href="#">About us</a><a href="#">Find us</a><a href="login.html">Sell on Happy Paws</a></div>
+      <div><h4>Store</h4><a href="#">About us</a><a href="#">Find us</a><a href="https://app.shopzo.be" target="_blank">Sell on Happy Paws</a></div>
     </div>
     <div class="footer-bottom"><span>© 2026 Happy Paws Store. All rights reserved.</span><span>Privacy · Terms · Cookies</span></div>
   </div>

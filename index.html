@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="shopzo-client.js" defer></script>
 </head>
 <body>
 
@@ -34,7 +35,7 @@
       <span class="icon-btn">♡</span>
       <span class="icon-btn">⌕</span>
       <a href="cart.html" class="icon-btn">🛒<span class="cart-count">3</span></a>
-      <a href="login.html" class="btn-login">Log in</a>
+      <a href="https://app.shopzo.be" class="btn-login" target="_blank">Log in</a>
     </div>
   </div>
 </header>
@@ -91,42 +92,25 @@
       <div><span class="mono">Staff picks</span><h2>Loved this week</h2></div>
       <a href="shop.html" class="see-all">View all products →</a>
     </div>
-    <div class="products">
-      <div class="product-card"><div class="string"></div>
-        <div class="product-tag"><span class="badge">New</span><div class="tag-hole-top"></div>
-          <div class="product-thumb">🦴</div>
-          <h4>Slow-Feed Puzzle Bowl</h4>
-          <div class="price-row"><span class="price">€18.90</span></div>
-          <div class="approved">Vet-recommended</div>
-        </div>
-      </div>
-      <div class="product-card"><div class="string"></div>
-        <div class="product-tag"><div class="tag-hole-top"></div>
-          <div class="product-thumb">🐟</div>
-          <h4>Grain-Free Salmon Kibble</h4>
-          <div class="price-row"><span class="price">€34.50</span></div>
-          <div class="approved">Bestseller · 2kg</div>
-        </div>
-      </div>
-      <div class="product-card"><div class="string"></div>
-        <div class="product-tag"><span class="badge badge-mustard">Sale</span><div class="tag-hole-top"></div>
-          <div class="product-thumb">🧸</div>
-          <h4>Rope &amp; Squeak Toy Set</h4>
-          <div class="price-row"><span class="price">€9.90</span><span class="price-old">€13.90</span></div>
-          <div class="approved">Tough chewer approved</div>
-        </div>
-      </div>
-      <div class="product-card"><div class="string"></div>
-        <div class="product-tag"><div class="tag-hole-top"></div>
-          <div class="product-thumb">🛏️</div>
-          <h4>Cosy Corner Pet Bed</h4>
-          <div class="price-row"><span class="price">€44.00</span></div>
-          <div class="approved">Machine washable</div>
-        </div>
-      </div>
+    <div class="products" id="staff-picks">
+      <p class="mono" style="grid-column:1/-1; padding:20px 0;">Loading products…</p>
     </div>
   </div>
 </section>
+
+<script>
+  (async function () {
+    const grid = document.getElementById('staff-picks');
+    try {
+      const products = await shopzoFetchProducts();
+      grid.innerHTML = products.length
+        ? products.slice(0, 4).map((p) => renderProductCard(p)).join('')
+        : '<p class="mono" style="grid-column:1/-1;">No products yet — check back soon.</p>';
+    } catch {
+      grid.innerHTML = '<p class="mono" style="grid-column:1/-1; color:var(--coral);">Could not load products right now.</p>';
+    }
+  })();
+</script>
 
 <div class="trust-bar">
   <div class="trust-item"><div class="num">01</div><div><div class="t-label">Free delivery over €40</div><div class="t-sub">Next-day across Belgium</div></div></div>
@@ -197,7 +181,7 @@
       <div><div class="footer-logo">Happy Paws Store</div><div style="font-size:0.85rem; opacity:0.8; max-width:240px; line-height:1.6;">Your neighbourhood pet store, now online too. Antwerp-based, pet-obsessed.</div></div>
       <div><h4>Shop</h4><a href="shop.html">Dogs</a><a href="shop.html">Cats</a><a href="shop.html">Small Pets</a><a href="shop.html">Aquatics</a></div>
       <div><h4>Help</h4><a href="#">Delivery info</a><a href="#">Returns</a><a href="#">Contact us</a><a href="#">FAQ</a></div>
-      <div><h4>Store</h4><a href="#">About us</a><a href="#">Find us</a><a href="login.html">Sell on Happy Paws</a></div>
+      <div><h4>Store</h4><a href="#">About us</a><a href="#">Find us</a><a href="https://app.shopzo.be" target="_blank">Sell on Happy Paws</a></div>
     </div>
     <div class="footer-bottom"><span>© 2026 Happy Paws Store. All rights reserved.</span><span>Privacy · Terms · Cookies</span></div>
   </div>

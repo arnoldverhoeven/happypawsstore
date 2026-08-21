@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="shopzo-client.js" defer></script>
 </head>
 <body>
 
@@ -28,61 +29,138 @@
       <span class="icon-btn">♡</span>
       <span class="icon-btn">⌕</span>
       <a href="cart.html" class="icon-btn">🛒<span class="cart-count">3</span></a>
-      <a href="login.html" class="btn-login">Log in</a>
+      <a href="https://app.shopzo.be" class="btn-login" target="_blank">Log in</a>
     </div>
   </div>
 </header>
 
 <div class="wrap">
   <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><span class="current">Your Cart</span></div>
-  <div class="page-head"><h1>Your Cart</h1><div class="count-label">3 items</div></div>
+  <div class="page-head"><h1>Your Cart</h1><div class="count-label" id="cart-count-label">Loading…</div></div>
 
   <div class="cart-layout">
-    <div>
-      <div class="cart-line">
-        <div class="cart-thumb">🦴</div>
-        <div><h4>Slow-Feed Puzzle Bowl</h4><div class="sub">Size: Medium</div><span class="cart-remove">Remove</span></div>
-        <div class="qty-stepper"><button>–</button><span>1</span><button>+</button></div>
-        <div class="price">€18.90</div>
-      </div>
-      <div class="cart-line">
-        <div class="cart-thumb">🐟</div>
-        <div><h4>Grain-Free Salmon Kibble</h4><div class="sub">2kg bag</div><span class="cart-remove">Remove</span></div>
-        <div class="qty-stepper"><button>–</button><span>1</span><button>+</button></div>
-        <div class="price">€34.50</div>
-      </div>
-      <div class="cart-line">
-        <div class="cart-thumb">🧸</div>
-        <div><h4>Rope &amp; Squeak Toy Set</h4><div class="sub">Pack of 2</div><span class="cart-remove">Remove</span></div>
-        <div class="qty-stepper"><button>–</button><span>2</span><button>+</button></div>
-        <div class="price">€19.80</div>
-      </div>
-      <a href="shop.html" style="display:inline-block; margin-top:24px; font-size:0.88rem; font-weight:600; color:var(--teal-700);">← Continue shopping</a>
+    <div id="cart-lines">
+      <p class="mono">Loading your cart…</p>
     </div>
 
     <div class="summary-card">
       <h3>Order Summary</h3>
-      <div class="summary-row"><span>Subtotal</span><span>€73.20</span></div>
+      <div class="summary-row"><span>Subtotal</span><span id="cart-subtotal">€0.00</span></div>
       <div class="summary-row"><span>Delivery</span><span style="color:#2A7A3B; font-weight:600;">Free</span></div>
-      <div class="promo-row">
-        <input type="text" placeholder="Discount code">
-        <button class="btn btn-outline btn-sm">Apply</button>
-      </div>
-      <div class="summary-row total"><span>Total</span><span>€73.20</span></div>
+      <div class="summary-row total"><span>Total</span><span id="cart-total">€0.00</span></div>
 
-      <a href="#" class="btn btn-primary btn-block" style="margin-top:20px;">Proceed to checkout</a>
+      <div class="field" style="margin-top:20px;">
+        <label>Your name</label>
+        <input type="text" id="checkout-name" placeholder="Jane Doe">
+      </div>
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" id="checkout-email" placeholder="you@example.com">
+      </div>
+      <p id="checkout-error" style="display:none; color:var(--coral); font-size:0.82rem; margin-bottom:10px;"></p>
+
+      <button type="button" id="checkout-btn" class="btn btn-primary btn-block">Proceed to checkout</button>
 
       <div class="pay-methods">
-        <span class="pay-chip">iDEAL</span>
         <span class="pay-chip">Bancontact</span>
-        <span class="pay-chip">Visa/Mastercard</span>
-        <span class="pay-chip">PayPal</span>
-        <span class="pay-chip">Klarna</span>
+        <span class="pay-chip">Payconiq</span>
       </div>
       <div class="mollie-note">🔒 Payments securely processed by Mollie. Happy Paws never sees your card details.</div>
     </div>
   </div>
 </div>
+
+<script>
+  let cartProducts = []; // full product data for items currently in the cart
+
+  async function loadCart() {
+    const cart = getCart();
+    const linesEl = document.getElementById('cart-lines');
+    const countLabel = document.getElementById('cart-count-label');
+
+    if (cart.length === 0) {
+      linesEl.innerHTML = '<p class="mono">Your cart is empty. <a href="shop.html" style="color:var(--teal-700);">Start shopping →</a></p>';
+      countLabel.textContent = '0 items';
+      document.getElementById('cart-subtotal').textContent = formatEuro(0);
+      document.getElementById('cart-total').textContent = formatEuro(0);
+      document.getElementById('checkout-btn').disabled = true;
+      document.getElementById('checkout-btn').style.opacity = '0.5';
+      return;
+    }
+
+    try {
+      const allProducts = await shopzoFetchProducts();
+      cartProducts = cart
+        .map((line) => {
+          const product = allProducts.find((p) => p.id === line.product_id);
+          return product ? { ...product, quantity: line.quantity } : null;
+        })
+        .filter(Boolean);
+    } catch {
+      linesEl.innerHTML = '<p class="mono" style="color:var(--coral);">Could not load your cart right now.</p>';
+      return;
+    }
+
+    countLabel.textContent = `${cartProducts.reduce((n, p) => n + p.quantity, 0)} items`;
+
+    linesEl.innerHTML = cartProducts.map((p) => {
+      const unitPrice = p.sale_price_cents ?? p.price_cents;
+      const thumb = p.image_url
+        ? `<img src="${p.image_url}" alt="" style="width:70px;height:70px;object-fit:cover;border-radius:10px;">`
+        : `<div class="cart-thumb">🛍️</div>`;
+      return `
+        <div class="cart-line" data-product-id="${p.id}">
+          ${thumb}
+          <div>
+            <h4>${p.name}</h4>
+            <div class="sub">${p.category || ''}</div>
+            <span class="cart-remove" onclick="removeFromCart('${p.id}'); loadCart();">Remove</span>
+          </div>
+          <div class="qty-stepper">
+            <button type="button" onclick="updateCartQuantity('${p.id}', ${p.quantity - 1}); loadCart();">–</button>
+            <span>${p.quantity}</span>
+            <button type="button" onclick="updateCartQuantity('${p.id}', ${p.quantity + 1}); loadCart();">+</button>
+          </div>
+          <div class="price">${formatEuro(unitPrice * p.quantity)}</div>
+        </div>
+      `;
+    }).join('') + '<a href="shop.html" style="display:inline-block; margin-top:24px; font-size:0.88rem; font-weight:600; color:var(--teal-700);">← Continue shopping</a>';
+
+    const subtotal = cartProducts.reduce((sum, p) => sum + (p.sale_price_cents ?? p.price_cents) * p.quantity, 0);
+    document.getElementById('cart-subtotal').textContent = formatEuro(subtotal);
+    document.getElementById('cart-total').textContent = formatEuro(subtotal);
+  }
+
+  document.getElementById('checkout-btn').addEventListener('click', async () => {
+    const errorEl = document.getElementById('checkout-error');
+    errorEl.style.display = 'none';
+
+    const name = document.getElementById('checkout-name').value.trim();
+    const email = document.getElementById('checkout-email').value.trim();
+
+    if (!name || !email) {
+      errorEl.textContent = 'Please fill in your name and email address.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('checkout-btn');
+    btn.disabled = true;
+    btn.textContent = 'Redirecting to payment…';
+
+    try {
+      const { checkout_url } = await shopzoCheckout({ name, email });
+      window.location.href = checkout_url;
+    } catch (err) {
+      errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Proceed to checkout';
+    }
+  });
+
+  loadCart();
+</script>
 
 <footer>
   <div class="wrap">
@@ -90,7 +168,7 @@
       <div><div class="footer-logo">Happy Paws Store</div><div style="font-size:0.85rem; opacity:0.8; max-width:240px; line-height:1.6;">Your neighbourhood pet store, now online too. Antwerp-based, pet-obsessed.</div></div>
       <div><h4>Shop</h4><a href="shop.html">Dogs</a><a href="shop.html">Cats</a><a href="shop.html">Small Pets</a><a href="shop.html">Aquatics</a></div>
       <div><h4>Help</h4><a href="#">Delivery info</a><a href="#">Returns</a><a href="#">Contact us</a><a href="#">FAQ</a></div>
-      <div><h4>Store</h4><a href="#">About us</a><a href="#">Find us</a><a href="login.html">Sell on Happy Paws</a></div>
+      <div><h4>Store</h4><a href="#">About us</a><a href="#">Find us</a><a href="https://app.shopzo.be" target="_blank">Sell on Happy Paws</a></div>
     </div>
     <div class="footer-bottom"><span>© 2026 Happy Paws Store. All rights reserved.</span><span>Privacy · Terms · Cookies</span></div>
   </div>
