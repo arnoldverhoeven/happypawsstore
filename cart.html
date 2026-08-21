@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Cart — Happy Paws Store</title>
+<title>Winkelmandje — Happy Paws Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -24,54 +24,54 @@
       </svg>
       <span class="logo-text">Happy Paws Store</span>
     </a>
-    <nav><a href="shop.html">Dogs</a><a href="shop.html">Cats</a><a href="shop.html">Small Pets</a><a href="shop.html">Aquatics</a><a href="shop.html">Sale</a></nav>
+    <nav id="shopzo-nav"><a href="shop.html">Shop</a></nav>
     <div class="header-actions">
       <span class="icon-btn">♡</span>
       <span class="icon-btn">⌕</span>
-      <a href="cart.html" class="icon-btn">🛒<span class="cart-count">3</span></a>
-      <a href="https://app.shopzo.be" class="btn-login" target="_blank">Log in</a>
+      <a href="cart.html" class="icon-btn">🛒<span class="cart-count">0</span></a>
+      <a href="https://app.shopzo.be" class="btn-login" target="_blank">Inloggen</a>
     </div>
   </div>
 </header>
 
 <div class="wrap">
-  <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><span class="current">Your Cart</span></div>
-  <div class="page-head"><h1>Your Cart</h1><div class="count-label" id="cart-count-label">Loading…</div></div>
+  <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><span class="current">Winkelmandje</span></div>
+  <div class="page-head"><h1>Je winkelmandje</h1><div class="count-label" id="cart-count-label">Laden…</div></div>
 
   <div class="cart-layout">
     <div id="cart-lines">
-      <p class="mono">Loading your cart…</p>
+      <p class="mono">Winkelmandje laden…</p>
     </div>
 
     <div class="summary-card">
-      <h3>Order Summary</h3>
-      <div class="summary-row"><span>Subtotal</span><span id="cart-subtotal">€0.00</span></div>
-      <div class="summary-row"><span>Delivery</span><span style="color:#2A7A3B; font-weight:600;">Free</span></div>
-      <div class="summary-row total"><span>Total</span><span id="cart-total">€0.00</span></div>
+      <h3>Bestelsamenvatting</h3>
+      <div class="summary-row"><span>Subtotaal</span><span id="cart-subtotal">€0,00</span></div>
+      <div class="summary-row"><span>Levering</span><span style="color:#2A7A3B; font-weight:600;">Gratis</span></div>
+      <div class="summary-row total"><span>Totaal</span><span id="cart-total">€0,00</span></div>
 
       <div class="field" style="margin-top:20px;">
-        <label>Your name</label>
-        <input type="text" id="checkout-name" placeholder="Jane Doe">
+        <label>Je naam</label>
+        <input type="text" id="checkout-name" placeholder="Jan Janssens">
       </div>
       <div class="field">
-        <label>Email address</label>
-        <input type="email" id="checkout-email" placeholder="you@example.com">
+        <label>E-mailadres</label>
+        <input type="email" id="checkout-email" placeholder="jij@voorbeeld.be">
       </div>
       <p id="checkout-error" style="display:none; color:var(--coral); font-size:0.82rem; margin-bottom:10px;"></p>
 
-      <button type="button" id="checkout-btn" class="btn btn-primary btn-block">Proceed to checkout</button>
+      <button type="button" id="checkout-btn" class="btn btn-primary btn-block">Afrekenen</button>
 
       <div class="pay-methods">
         <span class="pay-chip">Bancontact</span>
         <span class="pay-chip">Payconiq</span>
       </div>
-      <div class="mollie-note">🔒 Payments securely processed by Mollie. Happy Paws never sees your card details.</div>
+      <div class="mollie-note">🔒 Betalingen worden veilig verwerkt door Mollie. Happy Paws ziet je kaartgegevens nooit.</div>
     </div>
   </div>
 </div>
 
 <script>
-  let cartProducts = []; // full product data for items currently in the cart
+  let cartProducts = [];
 
   async function loadCart() {
     const cart = getCart();
@@ -79,7 +79,7 @@
     const countLabel = document.getElementById('cart-count-label');
 
     if (cart.length === 0) {
-      linesEl.innerHTML = '<p class="mono">Your cart is empty. <a href="shop.html" style="color:var(--teal-700);">Start shopping →</a></p>';
+      linesEl.innerHTML = '<p class="mono">Je winkelmandje is leeg. <a href="shop.html" style="color:var(--teal-700);">Begin met shoppen →</a></p>';
       countLabel.textContent = '0 items';
       document.getElementById('cart-subtotal').textContent = formatEuro(0);
       document.getElementById('cart-total').textContent = formatEuro(0);
@@ -97,7 +97,7 @@
         })
         .filter(Boolean);
     } catch {
-      linesEl.innerHTML = '<p class="mono" style="color:var(--coral);">Could not load your cart right now.</p>';
+      linesEl.innerHTML = '<p class="mono" style="color:var(--coral);">Je winkelmandje kon niet geladen worden.</p>';
       return;
     }
 
@@ -114,7 +114,7 @@
           <div>
             <h4>${p.name}</h4>
             <div class="sub">${p.category || ''}</div>
-            <span class="cart-remove" onclick="removeFromCart('${p.id}'); loadCart();">Remove</span>
+            <span class="cart-remove" onclick="removeFromCart('${p.id}'); loadCart();">Verwijderen</span>
           </div>
           <div class="qty-stepper">
             <button type="button" onclick="updateCartQuantity('${p.id}', ${p.quantity - 1}); loadCart();">–</button>
@@ -124,7 +124,7 @@
           <div class="price">${formatEuro(unitPrice * p.quantity)}</div>
         </div>
       `;
-    }).join('') + '<a href="shop.html" style="display:inline-block; margin-top:24px; font-size:0.88rem; font-weight:600; color:var(--teal-700);">← Continue shopping</a>';
+    }).join('') + '<a href="shop.html" style="display:inline-block; margin-top:24px; font-size:0.88rem; font-weight:600; color:var(--teal-700);">← Verder winkelen</a>';
 
     const subtotal = cartProducts.reduce((sum, p) => sum + (p.sale_price_cents ?? p.price_cents) * p.quantity, 0);
     document.getElementById('cart-subtotal').textContent = formatEuro(subtotal);
@@ -139,23 +139,23 @@
     const email = document.getElementById('checkout-email').value.trim();
 
     if (!name || !email) {
-      errorEl.textContent = 'Please fill in your name and email address.';
+      errorEl.textContent = 'Vul je naam en e-mailadres in.';
       errorEl.style.display = 'block';
       return;
     }
 
     const btn = document.getElementById('checkout-btn');
     btn.disabled = true;
-    btn.textContent = 'Redirecting to payment…';
+    btn.textContent = 'Doorverwijzen naar betaling…';
 
     try {
       const { checkout_url } = await shopzoCheckout({ name, email });
       window.location.href = checkout_url;
     } catch (err) {
-      errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+      errorEl.textContent = err.message || 'Er ging iets mis. Probeer het opnieuw.';
       errorEl.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = 'Proceed to checkout';
+      btn.textContent = 'Afrekenen';
     }
   });
 
@@ -165,12 +165,12 @@
 <footer>
   <div class="wrap">
     <div class="footer-grid">
-      <div><div class="footer-logo">Happy Paws Store</div><div style="font-size:0.85rem; opacity:0.8; max-width:240px; line-height:1.6;">Your neighbourhood pet store, now online too. Antwerp-based, pet-obsessed.</div></div>
-      <div><h4>Shop</h4><a href="shop.html">Dogs</a><a href="shop.html">Cats</a><a href="shop.html">Small Pets</a><a href="shop.html">Aquatics</a></div>
-      <div><h4>Help</h4><a href="#">Delivery info</a><a href="#">Returns</a><a href="#">Contact us</a><a href="#">FAQ</a></div>
-      <div><h4>Store</h4><a href="#">About us</a><a href="#">Find us</a><a href="https://app.shopzo.be" target="_blank">Sell on Happy Paws</a></div>
+      <div><div class="footer-logo">Happy Paws Store</div><div style="font-size:0.85rem; opacity:0.8; max-width:240px; line-height:1.6;">Je buurtwinkel voor huisdieren, nu ook online. Gevestigd in Antwerpen, gek op dieren.</div></div>
+      <div><h4>Shop</h4><a href="shop.html">Alle producten</a></div>
+      <div><h4>Hulp</h4><a href="#">Leveringsinfo</a><a href="#">Retourneren</a><a href="#">Contacteer ons</a><a href="#">Veelgestelde vragen</a></div>
+      <div><h4>Winkel</h4><a href="#">Over ons</a><a href="#">Vind ons</a><a href="https://app.shopzo.be" target="_blank">Verkopen op Happy Paws</a></div>
     </div>
-    <div class="footer-bottom"><span>© 2026 Happy Paws Store. All rights reserved.</span><span>Privacy · Terms · Cookies</span></div>
+    <div class="footer-bottom"><span>© 2026 Happy Paws Store. Alle rechten voorbehouden.</span><span>Privacy · Voorwaarden · Cookies</span></div>
   </div>
 </footer>
 

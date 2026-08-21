@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Slow-Feed Puzzle Bowl — Happy Paws Store</title>
+<title>Product — Happy Paws Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -24,23 +24,21 @@
       </svg>
       <span class="logo-text">Happy Paws Store</span>
     </a>
-    <nav>
-      <a href="shop.html">Dogs</a><a href="shop.html">Cats</a><a href="shop.html">Small Pets</a><a href="shop.html">Aquatics</a><a href="shop.html">Sale</a>
-    </nav>
+    <nav id="shopzo-nav"><a href="shop.html">Shop</a></nav>
     <div class="header-actions">
       <span class="icon-btn">♡</span>
       <span class="icon-btn">⌕</span>
-      <a href="cart.html" class="icon-btn">🛒<span class="cart-count">3</span></a>
-      <a href="https://app.shopzo.be" class="btn-login" target="_blank">Log in</a>
+      <a href="cart.html" class="icon-btn">🛒<span class="cart-count">0</span></a>
+      <a href="https://app.shopzo.be" class="btn-login" target="_blank">Inloggen</a>
     </div>
   </div>
 </header>
 
 <div class="wrap">
-  <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><a href="shop.html">Shop</a><span class="sep">/</span><span class="current" id="pd-breadcrumb">Loading…</span></div>
+  <div class="breadcrumb"><a href="index.html">Home</a><span class="sep">/</span><a href="shop.html">Shop</a><span class="sep">/</span><span class="current" id="pd-breadcrumb">Laden…</span></div>
 
   <div id="pd-loading" style="padding:80px 0; text-align:center;">
-    <p class="mono">Loading product…</p>
+    <p class="mono">Product laden…</p>
   </div>
 
   <div class="pd-layout" style="margin-top:26px; display:none;" id="pd-content">
@@ -50,7 +48,7 @@
 
     <div class="pd-info">
       <span class="mono" id="pd-category">Product</span>
-      <h1 id="pd-name">Loading…</h1>
+      <h1 id="pd-name">Laden…</h1>
       <div class="pd-price-row" id="pd-price-row"><span class="pd-price">—</span></div>
       <p class="pd-desc" id="pd-desc"></p>
 
@@ -60,23 +58,23 @@
           <span id="pd-qty">1</span>
           <button type="button" id="pd-qty-plus">+</button>
         </div>
-        <button type="button" id="pd-add-to-cart" class="btn btn-primary" style="flex:1; justify-content:center;">Add to cart</button>
+        <button type="button" id="pd-add-to-cart" class="btn btn-primary" style="flex:1; justify-content:center;">In winkelmandje</button>
       </div>
 
       <div class="pd-meta">
-        <div id="pd-stock"><strong>In stock</strong></div>
-        <div><strong>Free delivery</strong> on orders over €40</div>
-        <div><strong>Sold &amp; shipped by</strong> Happy Paws Store</div>
+        <div id="pd-stock"><strong>Op voorraad</strong></div>
+        <div><strong>Gratis levering</strong> vanaf €40</div>
+        <div><strong>Verkocht &amp; verzonden door</strong> Happy Paws Store</div>
       </div>
     </div>
   </div>
 
   <section class="section">
     <div class="section-head">
-      <div><span class="mono">You might also like</span><h2>Complete the routine</h2></div>
+      <div><span class="mono">Mogelijk ook interessant</span><h2>Vervolledig de routine</h2></div>
     </div>
     <div class="products" id="pd-related">
-      <p class="mono" style="grid-column:1/-1;">Loading…</p>
+      <p class="mono" style="grid-column:1/-1;">Laden…</p>
     </div>
   </section>
 </div>
@@ -89,7 +87,7 @@
     const contentEl = document.getElementById('pd-content');
 
     if (!productId) {
-      loadingEl.innerHTML = '<p class="mono">No product specified. <a href="shop.html">Back to shop →</a></p>';
+      loadingEl.innerHTML = '<p class="mono">Geen product opgegeven. <a href="shop.html">Terug naar de shop →</a></p>';
       return;
     }
 
@@ -97,13 +95,13 @@
     try {
       product = await shopzoFetchProduct(productId);
     } catch (err) {
-      loadingEl.innerHTML = '<p class="mono">Product not found. <a href="shop.html">Back to shop →</a></p>';
+      loadingEl.innerHTML = '<p class="mono">Product niet gevonden. <a href="shop.html">Terug naar de shop →</a></p>';
       return;
     }
 
     document.title = `${product.name} — Happy Paws Store`;
     document.getElementById('pd-breadcrumb').textContent = product.name;
-    document.getElementById('pd-category').textContent = product.category || 'Product';
+    document.getElementById('pd-category').textContent = product.subcategory || product.category || 'Product';
     document.getElementById('pd-name').textContent = product.name;
     document.getElementById('pd-desc').textContent = product.description || '';
 
@@ -121,8 +119,8 @@
 
     const stockEl = document.getElementById('pd-stock');
     stockEl.innerHTML = product.stock > 0
-      ? '<strong>In stock</strong> — ships within 1 business day'
-      : '<strong style="color:var(--coral);">Out of stock</strong>';
+      ? '<strong>Op voorraad</strong> — verzending binnen 1 werkdag'
+      : '<strong style="color:var(--coral);">Uitverkocht</strong>';
 
     let qty = 1;
     const qtyEl = document.getElementById('pd-qty');
@@ -138,7 +136,7 @@
     const addBtn = document.getElementById('pd-add-to-cart');
     if (product.stock <= 0) {
       addBtn.disabled = true;
-      addBtn.textContent = 'Out of stock';
+      addBtn.textContent = 'Uitverkocht';
       addBtn.style.opacity = '0.5';
     } else {
       addBtn.addEventListener('click', () => {
@@ -150,14 +148,13 @@
     loadingEl.style.display = 'none';
     contentEl.style.display = 'grid';
 
-    // Related products: a few other active products from the same store.
     try {
       const all = await shopzoFetchProducts();
       const related = all.filter((p) => p.id !== product.id).slice(0, 4);
       const relatedEl = document.getElementById('pd-related');
       relatedEl.innerHTML = related.length
         ? related.map((p) => renderProductCard(p)).join('')
-        : '<p class="mono">No other products yet.</p>';
+        : '<p class="mono">Nog geen andere producten.</p>';
     } catch {
       document.getElementById('pd-related').innerHTML = '';
     }
@@ -167,12 +164,12 @@
 <footer>
   <div class="wrap">
     <div class="footer-grid">
-      <div><div class="footer-logo">Happy Paws Store</div><div style="font-size:0.85rem; opacity:0.8; max-width:240px; line-height:1.6;">Your neighbourhood pet store, now online too. Antwerp-based, pet-obsessed.</div></div>
-      <div><h4>Shop</h4><a href="shop.html">Dogs</a><a href="shop.html">Cats</a><a href="shop.html">Small Pets</a><a href="shop.html">Aquatics</a></div>
-      <div><h4>Help</h4><a href="#">Delivery info</a><a href="#">Returns</a><a href="#">Contact us</a><a href="#">FAQ</a></div>
-      <div><h4>Store</h4><a href="#">About us</a><a href="#">Find us</a><a href="https://app.shopzo.be" target="_blank">Sell on Happy Paws</a></div>
+      <div><div class="footer-logo">Happy Paws Store</div><div style="font-size:0.85rem; opacity:0.8; max-width:240px; line-height:1.6;">Je buurtwinkel voor huisdieren, nu ook online. Gevestigd in Antwerpen, gek op dieren.</div></div>
+      <div><h4>Shop</h4><a href="shop.html">Alle producten</a></div>
+      <div><h4>Hulp</h4><a href="#">Leveringsinfo</a><a href="#">Retourneren</a><a href="#">Contacteer ons</a><a href="#">Veelgestelde vragen</a></div>
+      <div><h4>Winkel</h4><a href="#">Over ons</a><a href="#">Vind ons</a><a href="https://app.shopzo.be" target="_blank">Verkopen op Happy Paws</a></div>
     </div>
-    <div class="footer-bottom"><span>© 2026 Happy Paws Store. All rights reserved.</span><span>Privacy · Terms · Cookies</span></div>
+    <div class="footer-bottom"><span>© 2026 Happy Paws Store. Alle rechten voorbehouden.</span><span>Privacy · Voorwaarden · Cookies</span></div>
   </div>
 </footer>
 

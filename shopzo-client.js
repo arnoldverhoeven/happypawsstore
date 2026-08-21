@@ -1,12 +1,12 @@
 /* ================= SHOPZO INTEGRATION ================= */
-// Connects this storefront to the Shopzo platform (api.shopzo.be).
-// Change SHOPZO_SELLER below if this store's slug in Shopzo is ever renamed.
+// Koppelt deze webshop aan het Shopzo-platform (api.shopzo.be).
+// Pas SHOPZO_SELLER aan als de slug van deze winkel ooit wijzigt.
 
 const SHOPZO_API_BASE = 'https://api.shopzo.be';
 const SHOPZO_SELLER = 'happy-paws';
 const CART_STORAGE_KEY = 'shopzo_cart_happy-paws';
 
-/* ---------- Cart (stored in the browser, per device) ---------- */
+/* ---------- Winkelmandje (opgeslagen in de browser, per toestel) ---------- */
 
 function getCart() {
   try {
@@ -52,8 +52,6 @@ function cartItemCount() {
   return getCart().reduce((sum, line) => sum + line.quantity, 0);
 }
 
-// Updates every .cart-count badge on the current page (header shows one on
-// every template) to reflect the real number of items in the cart.
 function renderCartCount() {
   const count = cartItemCount();
   document.querySelectorAll('.cart-count').forEach((el) => {
@@ -62,25 +60,25 @@ function renderCartCount() {
   });
 }
 
-/* ---------- Talking to api.shopzo.be ---------- */
+/* ---------- Communicatie met api.shopzo.be ---------- */
 
 async function shopzoFetchProducts() {
   const res = await fetch(`${SHOPZO_API_BASE}/products?seller=${SHOPZO_SELLER}`);
-  if (!res.ok) throw new Error('Could not load products');
+  if (!res.ok) throw new Error('Producten konden niet geladen worden');
   const data = await res.json();
   return data.products;
 }
 
 async function shopzoFetchProduct(productId) {
   const res = await fetch(`${SHOPZO_API_BASE}/products?seller=${SHOPZO_SELLER}&id=${productId}`);
-  if (!res.ok) throw new Error('Product not found');
+  if (!res.ok) throw new Error('Product niet gevonden');
   const data = await res.json();
   return data.product;
 }
 
 async function shopzoCheckout({ name, email }) {
   const cart = getCart();
-  if (cart.length === 0) throw new Error('Your cart is empty.');
+  if (cart.length === 0) throw new Error('Je winkelmandje is leeg.');
 
   const res = await fetch(`${SHOPZO_API_BASE}/checkout`, {
     method: 'POST',
@@ -94,19 +92,24 @@ async function shopzoCheckout({ name, email }) {
   });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Checkout failed. Please try again.');
+  if (!res.ok) throw new Error(data.error || 'Afrekenen is mislukt. Probeer het opnieuw.');
   return data; // { order_id, checkout_url }
 }
 
-/* ---------- Formatting + rendering helpers ---------- */
+/* ---------- Opmaak- en render-hulpfuncties ---------- */
 
 function formatEuro(cents) {
-  return (cents / 100).toLocaleString('en-BE', { style: 'currency', currency: 'EUR' });
+  return (cents / 100).toLocaleString('nl-BE', { style: 'currency', currency: 'EUR' });
 }
 
-// Renders one product as the site's existing "hang-tag" card markup, so
-// dynamic products look identical to the original static ones. Pass
-// { linkToDetail: true } to wrap the card in a link to product.html.
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str ?? '';
+  return div.innerHTML;
+}
+
+// Rendert één product als de bestaande "hangertje"-kaart, zodat dynamische
+// producten er identiek uitzien als de originele statische kaarten.
 function renderProductCard(product, { linkToDetail = true } = {}) {
   const onSale = !!product.sale_price_cents;
   const priceHtml = onSale
@@ -118,6 +121,7 @@ function renderProductCard(product, { linkToDetail = true } = {}) {
     : `<div class="product-thumb">🛍️</div>`;
 
   const badge = onSale ? '<span class="badge badge-mustard">Sale</span>' : '';
+  const subLabel = product.subcategory || product.category || '';
 
   const inner = `
     <div class="string"></div>
@@ -127,7 +131,7 @@ function renderProductCard(product, { linkToDetail = true } = {}) {
       ${thumbHtml}
       <h4>${escapeHtml(product.name)}</h4>
       <div class="price-row">${priceHtml}</div>
-      <div class="approved">${escapeHtml(product.category || '')}</div>
+      <div class="approved">${escapeHtml(subLabel)}</div>
     </div>
   `;
 
@@ -137,11 +141,33 @@ function renderProductCard(product, { linkToDetail = true } = {}) {
   return `<div class="product-card">${inner}</div>`;
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str ?? '';
-  return div.innerHTML;
+/* ---------- Dynamische navigatie op basis van echte categorieën ---------- */
+
+// Vult <nav id="shopzo-nav"> op elke pagina met de echte category-waarden
+// uit het dashboard, plus een vaste "Sale"-link. Zo hoeft de navigatie
+// nergens hardcoded te staan en blijft ze altijd kloppen met wat de
+// verkoper effectief heeft ingevoerd.
+async function renderShopzoNav() {
+  const navEl = document.getElementById('shopzo-nav');
+  if (!navEl) return;
+
+  try {
+    const products = await shopzoFetchProducts();
+    const categories = [...new Set(products.map((p) => p.category).filter(Boolean))].sort();
+    const hasSale = products.some((p) => p.sale_price_cents);
+
+    const links = categories
+      .map((cat) => `<a href="shop.html?category=${encodeURIComponent(cat)}">${escapeHtml(cat)}</a>`)
+      .join('');
+    const saleLink = hasSale ? '<a href="shop.html?sale=1">Sale</a>' : '';
+
+    navEl.innerHTML = links + saleLink || '<a href="shop.html">Alle producten</a>';
+  } catch {
+    navEl.innerHTML = '<a href="shop.html">Shop</a>';
+  }
 }
 
-// Runs on every page load to keep the header cart badge accurate.
-document.addEventListener('DOMContentLoaded', renderCartCount);
+document.addEventListener('DOMContentLoaded', () => {
+  renderCartCount();
+  renderShopzoNav();
+});

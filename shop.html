@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shop Dogs — Happy Paws Store</title>
+<title>Shop — Happy Paws Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -24,18 +24,12 @@
       </svg>
       <span class="logo-text">Happy Paws Store</span>
     </a>
-    <nav>
-      <a href="shop.html" class="active">Dogs</a>
-      <a href="shop.html">Cats</a>
-      <a href="shop.html">Small Pets</a>
-      <a href="shop.html">Aquatics</a>
-      <a href="shop.html">Sale</a>
-    </nav>
+    <nav id="shopzo-nav"><a href="shop.html" class="active">Shop</a></nav>
     <div class="header-actions">
       <span class="icon-btn">♡</span>
       <span class="icon-btn">⌕</span>
-      <a href="cart.html" class="icon-btn">🛒<span class="cart-count">3</span></a>
-      <a href="https://app.shopzo.be" class="btn-login" target="_blank">Log in</a>
+      <a href="cart.html" class="icon-btn">🛒<span class="cart-count">0</span></a>
+      <a href="https://app.shopzo.be" class="btn-login" target="_blank">Inloggen</a>
     </div>
   </div>
 </header>
@@ -45,43 +39,50 @@
 
   <div class="page-head">
     <div>
-      <h1>All products</h1>
-      <div class="count-label" id="page-count-label">Loading…</div>
+      <h1>Alle producten</h1>
+      <div class="count-label" id="page-count-label">Laden…</div>
     </div>
   </div>
 
   <div class="shop-layout">
     <aside class="filters">
       <div class="filter-group">
-        <h4>Category</h4>
+        <h4>Categorie</h4>
         <div id="category-filters">
-          <p class="mono" style="opacity:0.5;">Loading…</p>
+          <p class="mono" style="opacity:0.5;">Laden…</p>
         </div>
       </div>
+      <div class="filter-group" id="subcategory-group" style="display:none;">
+        <h4>Type</h4>
+        <div id="subcategory-filters"></div>
+      </div>
       <div class="filter-group">
-        <h4>Price</h4>
+        <h4>Prijs</h4>
         <div class="price-range">
           <input type="number" id="price-min" placeholder="€0" min="0">
-          to
+          tot
           <input type="number" id="price-max" placeholder="€999" min="0">
         </div>
       </div>
-      <button class="btn btn-outline btn-block btn-sm" id="clear-filters">Clear filters</button>
+      <label class="filter-option">
+        <input type="checkbox" id="sale-only-checkbox"> Alleen sale
+      </label>
+      <button class="btn btn-outline btn-block btn-sm" id="clear-filters" style="margin-top:16px;">Filters wissen</button>
     </aside>
 
     <div>
       <div class="toolbar">
-        <span class="count-label" id="toolbar-count-label" style="font-size:0.85rem; color:var(--muted);">Loading…</span>
+        <span class="count-label" id="toolbar-count-label" style="font-size:0.85rem; color:var(--muted);">Laden…</span>
         <select class="sort-select" id="sort-select">
-          <option value="popular">Sort: Most popular</option>
-          <option value="price-asc">Price: low to high</option>
-          <option value="price-desc">Price: high to low</option>
-          <option value="newest">Newest first</option>
+          <option value="popular">Sorteren: Populair</option>
+          <option value="price-asc">Prijs: laag naar hoog</option>
+          <option value="price-desc">Prijs: hoog naar laag</option>
+          <option value="newest">Nieuwste eerst</option>
         </select>
       </div>
 
       <div class="products cols-3" id="shopzo-products">
-        <p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center;">Loading products…</p>
+        <p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center;">Producten laden…</p>
       </div>
 
       <div class="pagination">
@@ -93,38 +94,66 @@
 
 <script>
   let allProducts = [];
+  const urlParams = new URLSearchParams(window.location.search);
 
   function effectivePrice(p) {
     return (p.sale_price_cents ?? p.price_cents) / 100;
   }
 
-  function renderCategoryFilters(products) {
-    const categories = [...new Set(products.map((p) => p.category).filter(Boolean))].sort();
-    const container = document.getElementById('category-filters');
-
-    if (categories.length === 0) {
-      container.innerHTML = '<p class="mono" style="opacity:0.5;">No categories yet</p>';
+  function renderFilterGroup(containerId, values, checkboxClass) {
+    const container = document.getElementById(containerId);
+    if (values.length === 0) {
+      container.innerHTML = '<p class="mono" style="opacity:0.5;">Nog geen categorieën</p>';
       return;
     }
-
-    container.innerHTML = categories
+    container.innerHTML = values
       .map(
-        (cat) => `
+        (val) => `
         <label class="filter-option">
-          <input type="checkbox" class="category-checkbox" value="${escapeHtml(cat)}">
-          ${escapeHtml(cat)}
+          <input type="checkbox" class="${checkboxClass}" value="${escapeHtml(val)}">
+          ${escapeHtml(val)}
         </label>
       `
       )
       .join('');
-
-    container.querySelectorAll('.category-checkbox').forEach((cb) => {
+    container.querySelectorAll(`.${checkboxClass}`).forEach((cb) => {
       cb.addEventListener('change', applyFilters);
     });
   }
 
+  function renderFilters(products) {
+    const categories = [...new Set(products.map((p) => p.category).filter(Boolean))].sort();
+    const subcategories = [...new Set(products.map((p) => p.subcategory).filter(Boolean))].sort();
+
+    renderFilterGroup('category-filters', categories, 'category-checkbox');
+
+    if (subcategories.length > 0) {
+      document.getElementById('subcategory-group').style.display = 'block';
+      renderFilterGroup('subcategory-filters', subcategories, 'subcategory-checkbox');
+    }
+
+    // Filters vooraf aanvinken op basis van URL-parameters (bv. vanaf de homepage)
+    const categoryParam = urlParams.get('category');
+    const subcategoryParam = urlParams.get('subcategory');
+    const saleParam = urlParams.get('sale');
+
+    if (categoryParam) {
+      const cb = document.querySelector(`.category-checkbox[value="${CSS.escape(categoryParam)}"]`);
+      if (cb) cb.checked = true;
+    }
+    if (subcategoryParam) {
+      const cb = document.querySelector(`.subcategory-checkbox[value="${CSS.escape(subcategoryParam)}"]`);
+      if (cb) cb.checked = true;
+    }
+    if (saleParam === '1') {
+      document.getElementById('sale-only-checkbox').checked = true;
+    }
+  }
+
   function applyFilters() {
     const checkedCategories = [...document.querySelectorAll('.category-checkbox:checked')].map((cb) => cb.value);
+    const checkedSubcategories = [...document.querySelectorAll('.subcategory-checkbox:checked')].map((cb) => cb.value);
+    const saleOnly = document.getElementById('sale-only-checkbox').checked;
     const min = parseFloat(document.getElementById('price-min').value) || 0;
     const maxInput = document.getElementById('price-max').value;
     const max = maxInput ? parseFloat(maxInput) : Infinity;
@@ -132,15 +161,15 @@
 
     let filtered = allProducts.filter((p) => {
       const categoryOk = checkedCategories.length === 0 || checkedCategories.includes(p.category);
+      const subcategoryOk = checkedSubcategories.length === 0 || checkedSubcategories.includes(p.subcategory);
+      const saleOk = !saleOnly || !!p.sale_price_cents;
       const price = effectivePrice(p);
       const priceOk = price >= min && price <= max;
-      return categoryOk && priceOk;
+      return categoryOk && subcategoryOk && saleOk && priceOk;
     });
 
     if (sort === 'price-asc') filtered.sort((a, b) => effectivePrice(a) - effectivePrice(b));
     if (sort === 'price-desc') filtered.sort((a, b) => effectivePrice(b) - effectivePrice(a));
-    // "newest" and "popular" both fall back to the API's default order
-    // (newest first) since there's no popularity data yet.
 
     renderGrid(filtered);
   }
@@ -150,20 +179,22 @@
     const total = allProducts.length;
 
     document.getElementById('page-count-label').textContent =
-      `${total} product${total === 1 ? '' : 's'}`;
+      `${total} product${total === 1 ? '' : 'en'}`;
     document.getElementById('toolbar-count-label').textContent =
-      `Showing ${products.length} of ${total}`;
+      `${products.length} van ${total} getoond`;
 
     grid.innerHTML = products.length
       ? products.map((p) => renderProductCard(p)).join('')
-      : '<p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center;">No products match these filters.</p>';
+      : '<p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center;">Geen producten gevonden met deze filters.</p>';
   }
 
   document.getElementById('price-min').addEventListener('input', applyFilters);
   document.getElementById('price-max').addEventListener('input', applyFilters);
   document.getElementById('sort-select').addEventListener('change', applyFilters);
+  document.getElementById('sale-only-checkbox').addEventListener('change', applyFilters);
   document.getElementById('clear-filters').addEventListener('click', () => {
-    document.querySelectorAll('.category-checkbox').forEach((cb) => (cb.checked = false));
+    document.querySelectorAll('.category-checkbox, .subcategory-checkbox').forEach((cb) => (cb.checked = false));
+    document.getElementById('sale-only-checkbox').checked = false;
     document.getElementById('price-min').value = '';
     document.getElementById('price-max').value = '';
     document.getElementById('sort-select').value = 'popular';
@@ -174,16 +205,16 @@
     const grid = document.getElementById('shopzo-products');
     try {
       allProducts = await shopzoFetchProducts();
-      renderCategoryFilters(allProducts);
+      renderFilters(allProducts);
       if (allProducts.length === 0) {
-        document.getElementById('page-count-label').textContent = '0 products';
-        document.getElementById('toolbar-count-label').textContent = 'Showing 0 of 0';
-        grid.innerHTML = '<p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center;">No products yet — check back soon.</p>';
+        document.getElementById('page-count-label').textContent = '0 producten';
+        document.getElementById('toolbar-count-label').textContent = '0 van 0 getoond';
+        grid.innerHTML = '<p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center;">Nog geen producten — kom binnenkort terug.</p>';
         return;
       }
-      renderGrid(allProducts);
+      applyFilters();
     } catch (err) {
-      grid.innerHTML = '<p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center; color:var(--coral);">Could not load products right now.</p>';
+      grid.innerHTML = '<p class="mono" style="grid-column:1/-1; padding:40px 0; text-align:center; color:var(--coral);">Producten konden niet geladen worden.</p>';
     }
   })();
 </script>
@@ -191,12 +222,12 @@
 <footer>
   <div class="wrap">
     <div class="footer-grid">
-      <div><div class="footer-logo">Happy Paws Store</div><div style="font-size:0.85rem; opacity:0.8; max-width:240px; line-height:1.6;">Your neighbourhood pet store, now online too. Antwerp-based, pet-obsessed.</div></div>
-      <div><h4>Shop</h4><a href="shop.html">Dogs</a><a href="shop.html">Cats</a><a href="shop.html">Small Pets</a><a href="shop.html">Aquatics</a></div>
-      <div><h4>Help</h4><a href="#">Delivery info</a><a href="#">Returns</a><a href="#">Contact us</a><a href="#">FAQ</a></div>
-      <div><h4>Store</h4><a href="#">About us</a><a href="#">Find us</a><a href="https://app.shopzo.be" target="_blank">Sell on Happy Paws</a></div>
+      <div><div class="footer-logo">Happy Paws Store</div><div style="font-size:0.85rem; opacity:0.8; max-width:240px; line-height:1.6;">Je buurtwinkel voor huisdieren, nu ook online. Gevestigd in Antwerpen, gek op dieren.</div></div>
+      <div><h4>Shop</h4><a href="shop.html">Alle producten</a></div>
+      <div><h4>Hulp</h4><a href="#">Leveringsinfo</a><a href="#">Retourneren</a><a href="#">Contacteer ons</a><a href="#">Veelgestelde vragen</a></div>
+      <div><h4>Winkel</h4><a href="#">Over ons</a><a href="#">Vind ons</a><a href="https://app.shopzo.be" target="_blank">Verkopen op Happy Paws</a></div>
     </div>
-    <div class="footer-bottom"><span>© 2026 Happy Paws Store. All rights reserved.</span><span>Privacy · Terms · Cookies</span></div>
+    <div class="footer-bottom"><span>© 2026 Happy Paws Store. Alle rechten voorbehouden.</span><span>Privacy · Voorwaarden · Cookies</span></div>
   </div>
 </footer>
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thank you — Happy Paws Store</title>
+<title>Bedankt — Happy Paws Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -24,7 +24,7 @@
       </svg>
       <span class="logo-text">Happy Paws Store</span>
     </a>
-    <nav><a href="shop.html">Dogs</a><a href="shop.html">Cats</a><a href="shop.html">Small Pets</a><a href="shop.html">Aquatics</a></nav>
+    <nav id="shopzo-nav"><a href="shop.html">Shop</a></nav>
     <div class="header-actions">
       <a href="cart.html" class="icon-btn">🛒<span class="cart-count">0</span></a>
     </div>
@@ -33,35 +33,27 @@
 
 <div class="auth-shell">
   <div class="auth-card" style="text-align:center; max-width:460px;">
-    <div id="status-icon" style="font-size:2.6rem; margin-bottom:10px;">⏳</div>
-    <h1 id="status-title">Checking your payment…</h1>
-    <div class="sub" id="status-sub">One moment please.</div>
-    <a href="shop.html" class="btn btn-primary btn-block" style="margin-top:24px;">Continue shopping</a>
+    <div id="status-icon" style="font-size:2.6rem; margin-bottom:10px;">🐾</div>
+    <h1 id="status-title">Bedankt voor je bestelling!</h1>
+    <div class="sub" id="status-sub">We hebben je bestelling ontvangen en sturen je binnenkort een bevestiging per e-mail.</div>
+    <a href="shop.html" class="btn btn-primary btn-block" style="margin-top:24px;">Verder winkelen</a>
   </div>
 </div>
 
 <footer>
   <div class="wrap">
     <div class="footer-bottom" style="border-top:none; padding-top:0;">
-      <span>© 2026 Happy Paws Store. All rights reserved.</span>
-      <span>Privacy · Terms · Cookies</span>
+      <span>© 2026 Happy Paws Store. Alle rechten voorbehouden.</span>
+      <span>Privacy · Voorwaarden · Cookies</span>
     </div>
   </div>
 </footer>
 
 <script>
-  // Mollie's redirect doesn't reliably carry final payment status in the
-  // URL, and the webhook that confirms payment can arrive slightly after
-  // the customer lands here — so this shows a generic thank-you rather
-  // than claiming a definitive status. The order status itself is always
-  // accurate in the seller's dashboard regardless of timing.
-  (function () {
-    saveCart([]); // clear the cart now that checkout has been attempted
-    document.getElementById('status-icon').textContent = '🐾';
-    document.getElementById('status-title').textContent = 'Thank you for your order!';
-    document.getElementById('status-sub').textContent =
-      "We've received your order and will send a confirmation email shortly.";
-  })();
+  // De cart wordt geleegd na een checkout-poging. De exacte betaalstatus
+  // wordt via de webhook bevestigd, wat net na deze pagina kan gebeuren —
+  // de bestelling zelf staat altijd correct in het dashboard van de verkoper.
+  saveCart([]);
 </script>
 
 </body>
